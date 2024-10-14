@@ -16,9 +16,9 @@ install_package() {
     log "Downloading $package_url"
     wget -q --show-progress "$package_url"
     log "Installing $(basename $package_url)"
-    sudo dpkg --install $(basename $package_url)
+    su dpkg --install $(basename $package_url)
     log "Fixing broken dependencies"
-    sudo apt-get install --fix-broken -y
+    su apt-get install --fix-broken -y
     rm $(basename $package_url)
 }
 
@@ -27,26 +27,26 @@ log "Starting installation"
 
 # Create user
 log "Creating user '$username'"
-sudo useradd -m "$username"
-echo "$username:$password" | sudo chpasswd
-sudo sed -i 's/\/bin\/sh/\/bin\/bash/g' /etc/passwd
+su useradd -m "$username"
+echo "$username:$password" | su chpasswd
+su sed -i 's/\/bin\/sh/\/bin\/bash/g' /etc/passwd
 
 # Install Chrome Remote Desktop
 install_package "$chrome_remote_desktop_url"
 
 # Install XFCE desktop environment
 log "Installing XFCE desktop environment"
-sudo DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes -y xfce4 desktop-base dbus-x11 xscreensaver
+su DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes -y xfce4 desktop-base dbus-x11 xscreensaver
 
 # Set up Chrome Remote Desktop session
 log "Setting up Chrome Remote Desktop session"
-sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
+su bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
 
 # Disable lightdm service
 log "Disabling lightdm service"
-sudo systemctl disable lightdm.service
+su systemctl disable lightdm.service
 
 # Install Firefox ESR
-sudo apt update
-sudo apt install firefox
+su apt update
+su apt install firefox
 log "Installation completed successfully"
